@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>신호등을 건너라! 🚦</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Pretendard:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app-container" id="app-container">
+    <!-- 상단 사운드 토글 버튼 -->
+    <button id="sound-toggle-btn" class="sound-btn" aria-label="효과음 켜기/끄기" title="효과음 켜기/끄기">
+      🔊
+    </button>
+
+    <!-- ① 시작 화면 -->
+    <section id="start-screen" class="screen active">
+      <div class="title-badge">교통안전 스테이지 게임</div>
+      <h1 class="game-title">🚦 신호등을<br><span>건너라!</span></h1>
+
+      <div class="hero-illustration">
+        <div class="mini-traffic-light">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green glow"></span>
+        </div>
+        <div class="hero-road">
+          <div class="hero-crosswalk"></div>
+          <div class="hero-character">🧒</div>
+          <div class="hero-car">🚗</div>
+        </div>
+      </div>
+
+      <div class="rules-card">
+        <h2>🎈 이렇게 플레이해요!</h2>
+        <ul class="rules-list">
+          <li>
+            <span class="rule-icon green-badge">초록불</span>
+            <span>초록불이 켜지면 <strong>[건너기!]</strong> 버튼을 눌러요!</span>
+          </li>
+          <li>
+            <span class="rule-icon red-badge">빨간불</span>
+            <span>빨간불·노란불에 건너면 <strong>하트(❤️)</strong>가 줄어들어요!</span>
+          </li>
+          <li>
+            <span class="rule-icon combo-badge">스테이지</span>
+            <span>목표 횟수를 채워 <strong>Stage 1~4 클리어 & 마스터</strong>에 도전!</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="character-select-box">
+        <span class="select-label">내 캐릭터 고르기</span>
+        <div class="character-options" id="character-options">
+          <button type="button" class="char-btn selected" data-char="🧒">🧒<span>어린이</span></button>
+          <button type="button" class="char-btn" data-char="👧">👧<span>소녀</span></button>
+          <button type="button" class="char-btn" data-char="🐶">🐶<span>강아지</span></button>
+          <button type="button" class="char-btn" data-char="🐥">🐥<span>병아리</span></button>
+        </div>
+      </div>
+
+      <div class="best-score-banner">
+        🏆 내 최고 기록: <strong id="start-best-score">0</strong>점
+      </div>
+
+      <button id="start-btn" class="primary-btn pulse-btn">
+        게임 시작하기 ▶
+      </button>
+      <p class="keyboard-hint">💡 PC에서는 <strong>스페이스바(Space)</strong>로도 건널 수 있어요!</p>
+    </section>
+
+    <!-- ② 게임 플레이 화면 -->
+    <section id="game-screen" class="screen">
+      <!-- 상단 상태바 -->
+      <header class="hud-bar">
+        <div class="hud-item time-box">
+          <span class="hud-label">남은 시간</span>
+          <span class="hud-value"><strong id="time-display">60</strong>초</span>
+        </div>
+        <div class="hud-item score-box">
+          <span class="hud-label">점수</span>
+          <span class="hud-value"><strong id="score-display">0</strong></span>
+        </div>
+        <div class="hud-item combo-box">
+          <span class="hud-label">콤보</span>
+          <span class="hud-value"><strong id="combo-display">0</strong>🔥</span>
+        </div>
+        <div class="hud-item life-box">
+          <span class="hud-label">기회 (실수 <span id="mistake-count">0</span>/3)</span>
+          <div class="hearts" id="hearts-display" aria-label="남은 목숨">❤️❤️❤️</div>
+        </div>
+      </header>
+
+      <!-- 스테이지 정보 & 진행도 바 -->
+      <div class="stage-info-bar" id="stage-info-bar">
+        <div class="stage-name-wrap">
+          <span class="stage-badge" id="stage-badge">STAGE 1</span>
+          <strong class="stage-title" id="stage-title">🏡 집 앞 골목길</strong>
+        </div>
+        <div class="stage-goal-wrap">
+          <span id="stage-goal-text">목표 0 / 3회</span>
+          <div class="stage-dots" id="stage-dots"></div>
+        </div>
+      </div>
+
+      <!-- 시간 진행 게이지 -->
+      <div class="timer-progress-wrap">
+        <div class="timer-progress-bar" id="timer-bar"></div>
+      </div>
+
+      <!-- 중앙 스테이지 -->
+      <div class="game-stage theme-stage-1" id="game-stage">
+        <!-- 하늘 & 구름/빗방울 장식 -->
+        <div class="sky-decor">
+          <span class="cloud c1" id="sky-icon-1">☁️</span>
+          <span class="cloud c2" id="sky-icon-2">☁️</span>
+          <div class="rain-layer hidden" id="rain-layer">💧 💧 💧 💧 💧</div>
+          <div class="buildings" id="stage-buildings">🏡 🌳 🏠 🌳 🏡</div>
+        </div>
+
+        <!-- 신호등 영역 -->
+        <div class="traffic-light-wrapper">
+          <div class="traffic-light-box" id="traffic-light-box">
+            <div class="light red active" id="light-red" aria-label="빨간불">
+              <span class="light-icon">✋</span>
+            </div>
+            <div class="light yellow" id="light-yellow" aria-label="노란불">
+              <span class="light-icon">⚠️</span>
+            </div>
+            <div class="light green" id="light-green" aria-label="초록불">
+              <span class="light-icon">🚶</span>
+            </div>
+          </div>
+          <div class="light-status-badge" id="light-status-text">
+            🛑 멈춰서 기다려요!
+          </div>
+        </div>
+
+        <!-- 스테이지 클리어 팝업 오버레이 -->
+        <div class="stage-clear-modal" id="stage-clear-modal">
+          <div class="stage-clear-title" id="stage-clear-title">🎉 STAGE 1 CLEAR!</div>
+          <div class="stage-clear-bonus" id="stage-clear-bonus">보너스 +50점 | 시간 +10초 ⏱️</div>
+          <div class="stage-clear-next" id="stage-clear-next">다음: 🏪 번화가 사거리</div>
+        </div>
+
+        <!-- 판정 피드백 팝업 메시지 -->
+        <div class="feedback-banner" id="feedback-banner" aria-live="polite"></div>
+
+        <!-- 도로 & 횡단보도 & 캐릭터 영역 -->
+        <div class="road-area">
+          <div class="sidewalk left-sidewalk">
+            <span class="wait-sign">출발</span>
+          </div>
+
+          <div class="crosswalk" id="crosswalk">
+            <div class="stripe"></div>
+            <div class="stripe"></div>
+            <div class="stripe"></div>
+            <div class="stripe"></div>
+            <div class="stripe"></div>
+            <div class="stripe"></div>
+          </div>
+
+          <div class="sidewalk right-sidewalk">
+            <span class="goal-sign">도착🚩</span>
+          </div>
+
+          <!-- 지나가는 자동차 (빨간불 연출) -->
+          <div class="passing-car" id="passing-car">🚗</div>
+
+          <!-- 플레이어 캐릭터 -->
+          <div class="player-character" id="player-character">
+            <div class="char-bubble" id="char-bubble">신호를 봐요!</div>
+            <div class="char-emoji" id="char-emoji">🧒</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 하단 조작 버튼 -->
+      <div class="control-area">
+        <button id="cross-btn" class="cross-action-btn" type="button">
+          <span class="btn-icon">🏃‍♂️</span>
+          <span class="btn-text">건너기!</span>
+          <span class="btn-sub">(초록불일 때 꾹!)</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ③ 결과 화면 -->
+    <section id="result-screen" class="screen">
+      <div class="result-header">
+        <div class="result-emoji" id="result-emoji">🎉</div>
+        <h2 class="result-title" id="result-title">안전하게 도착했어요!</h2>
+        <p class="result-subtitle" id="result-subtitle">초록불을 정말 잘 확인했네요!</p>
+      </div>
+
+      <div class="new-record-badge hidden" id="new-record-badge">
+        👑 새로운 최고 기록 달성! 👑
+      </div>
+
+      <div class="score-summary-card">
+        <div class="final-score-row">
+          <span>최종 점수</span>
+          <strong id="final-score" class="highlight-score">0점</strong>
+          <span class="final-stage-pill" id="final-stage-reached">도달: Stage 1 (집 앞 골목길)</span>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-box">
+            <span class="stat-label">최고 콤보</span>
+            <strong id="final-max-combo">0연속 🔥</strong>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">안전 횡단</span>
+            <strong id="final-success-count">0회 🚶</strong>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">실수 횟수</span>
+            <strong id="final-mistakes">0회 ⚠️</strong>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">역대 최고점</span>
+            <strong id="final-best-score">0점 🏆</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="safety-tip-box">
+        <span class="tip-badge">💡 오늘의 교통안전 약속</span>
+        <p id="safety-tip-text">
+          초록불이 켜져도 좌우를 살피며 차가 완전히 멈췄는지 확인하고 건너요!
+        </p>
+      </div>
+
+      <div class="result-actions">
+        <button id="restart-btn" class="primary-btn pulse-btn">
+          다시 도전하기 🔄
+        </button>
+        <button id="home-btn" class="secondary-btn">
+          처음 화면으로 🏠
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
